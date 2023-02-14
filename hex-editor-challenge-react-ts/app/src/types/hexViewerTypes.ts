@@ -1,5 +1,5 @@
 export interface HexProps {
-  data: string | Uint8Array;
+  data: string | Uint8Array | Uint16Array | ArrayBuffer;
 }
 
 export interface ElementData {
@@ -7,3 +7,5 @@ export interface ElementData {
   index: number | null;
   offset: number | null;
 }
+
+export type FileTypes = string | Uint8Array | Uint16Array | ArrayBuffer | null;

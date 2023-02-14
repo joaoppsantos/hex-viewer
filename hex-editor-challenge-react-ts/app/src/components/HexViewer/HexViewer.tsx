@@ -43,19 +43,25 @@ export const HexViewer: FC<HexProps> = ({ data }) => {
     });
   };
 
-  for (let offset = 0; offset < data.length; offset += blocksPerRow) {
-    const blocks = [...data.slice(offset, offset + blocksPerRow)];
-    const bytes = blocks.map((block, i) => {
+  const byteLength =
+    data instanceof ArrayBuffer ? data.byteLength : data.length;
+  const encoder = new TextEncoder();
+  const uint8Array =
+    typeof data === "string" ? encoder.encode(data) : new Uint8Array(data);
+
+  for (let offset = 0; offset < byteLength; offset += blocksPerRow) {
+    const blocks = [...uint8Array.slice(offset, offset + blocksPerRow)];
+    const bytes = blocks.map((block, index) => {
       const selected =
-        elementSelected.index === i && elementSelected.offset === offset
+        elementSelected.index === index && elementSelected.offset === offset
           ? styles.viewer_highlighted
           : "";
 
       return (
         <span
-          key={offset + i}
+          key={`${index}-${offset}`}
           className={`${styles.viewer_block} ${selected}`}
-          onClick={(e) => onClickElement(i, offset, e)}
+          onClick={(e) => onClickElement(index, offset, e)}
         >
           {convertToHex(block, 2)}
         </span>
@@ -80,7 +86,7 @@ export const HexViewer: FC<HexProps> = ({ data }) => {
 
           return typeof block === "string" ? (
             <span
-              key={offset + index}
+              key={`${index}-${offset}`}
               className={selected}
               onClick={(e) => onClickElement(index, offset, e)}
             >
@@ -88,7 +94,7 @@ export const HexViewer: FC<HexProps> = ({ data }) => {
             </span>
           ) : block >= 0x20 && block < 0x7f ? (
             <span
-              key={offset + index}
+              key={`${index}-${offset}`}
               className={selected}
               onClick={(e) => onClickElement(index, offset, e)}
             >
@@ -96,7 +102,7 @@ export const HexViewer: FC<HexProps> = ({ data }) => {
             </span>
           ) : (
             <span
-              key={offset + index}
+              key={`${index}-${offset}`}
               className={selected}
               onClick={(e) => onClickElement(index, offset, e)}
             >
