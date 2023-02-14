@@ -68,6 +68,14 @@ export const HexViewer: FC<HexProps> = ({ data }) => {
       );
     });
 
+    while (bytes.length < blocksPerRow) {
+      bytes.push(
+        <span key={`empty-${bytes.length}`} className={styles.viewer_block}>
+          &nbsp;&nbsp;
+        </span>
+      );
+    }
+
     const hexValues = (
       <div className={styles.viewer_offsetLine}>{convertToHex(offset, 8)}</div>
     );
