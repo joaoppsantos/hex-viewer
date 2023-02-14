@@ -1,16 +1,35 @@
 import React, { FC, useState, MouseEvent } from "react";
-import ConvertToHex from "../../lib/hexConversion";
+import { convertToHex, clipboardCopy } from "../../lib/";
 import { ElementData, HexProps } from "../../types/hexViewerTypes";
-import { BLOCKS_PER_ROW } from "../../utils/constants";
+import {
+  BLOCKS_PER_ROW,
+  BLOCKS_PER_ROW_650,
+  BLOCKS_PER_ROW_840,
+} from "../../utils/constants";
 import styles from "./HexViewer.module.scss";
+import { useMediaQuery } from "react-responsive";
 
 export const HexViewer: FC<HexProps> = ({ data }) => {
   const lines: React.ReactElement[] = [];
+  const [elementCopy, setElementCopy] = useState("");
   const [elementSelected, setElementSelected] = useState<ElementData>({
     value: "",
     index: null,
     offset: null,
   });
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 650px)" });
+  const isMediumScreen = useMediaQuery({ query: "(max-width: 840px)" });
+  const blocksPerRow = getBlocksPerRow(isSmallScreen, isMediumScreen);
+
+  function getBlocksPerRow(isSmallScreen: boolean, isMediumScreen: boolean) {
+    if (isSmallScreen) {
+      return BLOCKS_PER_ROW;
+    } else if (isMediumScreen) {
+      return BLOCKS_PER_ROW_650;
+    } else {
+      return BLOCKS_PER_ROW_840;
+    }
+  }
 
   const onClickElement = (
     index: number,
@@ -24,8 +43,8 @@ export const HexViewer: FC<HexProps> = ({ data }) => {
     });
   };
 
-  for (let offset = 0; offset < data.length; offset += BLOCKS_PER_ROW) {
-    const blocks = [...data.slice(offset, offset + BLOCKS_PER_ROW)];
+  for (let offset = 0; offset < data.length; offset += blocksPerRow) {
+    const blocks = [...data.slice(offset, offset + blocksPerRow)];
     const bytes = blocks.map((block, i) => {
       const selected =
         elementSelected.index === i && elementSelected.offset === offset
@@ -38,15 +57,13 @@ export const HexViewer: FC<HexProps> = ({ data }) => {
           className={`${styles.viewer_block} ${selected}`}
           onClick={(e) => onClickElement(i, offset, e)}
         >
-          {ConvertToHex({ value: block, length: 2 })}
+          {convertToHex(block, 2)}
         </span>
       );
     });
 
     const hexValues = (
-      <div className={styles.viewer_offsetLine}>
-        {ConvertToHex({ value: offset, length: 8 })}
-      </div>
+      <div className={styles.viewer_offsetLine}>{convertToHex(offset, 8)}</div>
     );
     const hexTable = (
       <div className={styles.viewer_blockLine}>
@@ -56,7 +73,6 @@ export const HexViewer: FC<HexProps> = ({ data }) => {
     const asciiSection = (
       <div className={styles.viewer_asciiLine}>
         {blocks.map((block, index) => {
-          console.log(elementSelected, index, offset, "index offset");
           const selected =
             elementSelected.index === index && elementSelected.offset === offset
               ? styles.viewer_highlighted
@@ -103,7 +119,33 @@ export const HexViewer: FC<HexProps> = ({ data }) => {
   return (
     <pre className={styles.wrapper}>
       <span className={styles.title}>Here comes the HexViewer</span>
-      {lines}
+      <>
+        <div className={styles.clipboard_container}>
+          <span className={styles.clipboard}>
+            Click in a value from hex or ascii tables and Copy button to get it
+            copied to clipboard
+          </span>
+          {elementCopy && (
+            <span className={styles.clipboard}>
+              <b>{elementCopy}</b> was copied to clipboard
+            </span>
+          )}
+          <button
+            className={styles.copy_button}
+            onClick={() => {
+              if (elementSelected.value) {
+                const value = elementSelected.value?.toString();
+                clipboardCopy(value).then(() => {
+                  setElementCopy(`${value}`);
+                });
+              }
+            }}
+          >
+            Copy
+          </button>
+        </div>
+        {lines}
+      </>
     </pre>
   );
 };

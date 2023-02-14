@@ -20,6 +20,25 @@ $highlight: #b5dcaf;
   margin: 24px 0;
 }
 
+.clipboard {
+  word-break: initial;
+  width: 85%;
+  text-align: center;
+  margin-bottom: 16px;
+
+  &_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 8px;
+  }
+}
+
+.copy_button {
+  width: 75px;
+  padding: 8px;
+}
+
 .viewer {
   &_block,
   &_offsetLine,
@@ -38,12 +57,12 @@ $highlight: #b5dcaf;
     border-bottom: 1px solid black;
   }
   &_block {
-    margin-right: 8px;
+    margin-right: 4px;
   }
   &_offsetLine {
-    margin-right: 24px;
+    margin-right: 16px;
   }
   &_asciiLine {
-    margin-left: 24px;
+    margin-left: 16px;
   }
 }
